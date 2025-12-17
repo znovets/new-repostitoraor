@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Экзамен по программированию на C/C++</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .question {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .question h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        
+        .options {
+            margin: 15px 0;
+        }
+        
+        .option {
+            display: block;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .option:hover {
+            background-color: #eef7ff;
+        }
+        
+        .option.selected {
+            background-color: #d4edff;
+            border-left: 4px solid #3498db;
+        }
+        
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .feedback {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .correct {
+            background-color: #d4f8d4;
+            color: #2d5a2d;
+            border-left: 4px solid #28a745;
+        }
+        
+        .incorrect {
+            background-color: #f8d4d4;
+            color: #5a2d2d;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin: 0 5px;
+        }
+        
+        .button:hover {
+            background-color: #2980b9;
+        }
+        
+        .button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .finish-btn {
+            background-color: #e74c3c;
+        }
+        
+        .finish-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        
+        .score {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #3498db;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .difficulty-btn {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+            border-radius: 50%;
+            border: 2px solid #3498db;
+            background-color: white;
+            color: #3498db;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .difficulty-btn.selected {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .code-editor {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        
+        .result {
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4f8d4;
+            color: #2d5a2d;
+            border: 2px solid #28a745;
+        }
+        
+        .failure {
+            background-color: #f8d4d4;
+            color: #5a2d2d;
+            border: 2px solid #dc3545;
+        }
+        
+        .theory-complete {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e8f4fd;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .test-data {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .explanation {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Экзамен по программированию на C/C++</h1>
+        <p>Теоретические вопросы и практическое задание</p>
+    </div>
+    
+    <!-- Начальный экран -->
+    <div id="start-screen">
+        <div class="question">
+            <h3>Инструкция</h3>
+            <p>Экзамен состоит из двух частей:</p>
+            <ol>
+                <li><strong>Теоретическая часть</strong> - 2 случайных вопроса с выбором ответа</li>
+                <li><strong>Практическая часть</strong> - программирование задачи выбранной сложности</li>
+            </ol>
+            <p>Выберите сложность практического задания (1 - самая простая, 10 - самая сложная):</p>
+            
+            <div class="difficulty-selector">
+                <button class="difficulty-btn" data-level="1">1</button>
+                <button class="difficulty-btn" data-level="2">2</button>
+                <button class="difficulty-btn" data-level="3">3</button>
+                <button class="difficulty-btn" data-level="4">4</button>
+                <button class="difficulty-btn" data-level="5">5</button>
+                <button class="difficulty-btn" data-level="6">6</button>
+                <button class="difficulty-btn" data-level="7">7</button>
+                <button class="difficulty-btn" data-level="8">8</button>
+                <button class="difficulty-btn" data-level="9">9</button>
+                <button class="difficulty-btn" data-level="10">10</button>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="start-btn" class="button" disabled>Начать экзамен</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Теоретическая часть -->
+    <div id="theory-screen" class="hidden">
+        <div class="progress-bar">
+            <div class="progress" id="theory-progress"></div>
+        </div>
+        
+        <div id="theory-container"></div>
+        
+        <div class="controls">
+            <button id="prev-theory-btn" class="button" disabled>Предыдущий</button>
+            <button id="next-theory-btn" class="button">Следующий</button>
+        </div>
+        
+        <div class="score">
+            Теоретический вопрос <span id="current-theory">1</span> из <span id="total-theory">2</span>
+        </div>
+        
+        <!-- Добавляем кнопку для перехода к практике -->
+        <div id="theory-complete-section" class="hidden">
+            <div class="theory-complete">
+                <h3>Теоретическая часть завершена!</h3>
+                <p>Вы ответили на все теоретические вопросы. Теперь перейдите к практической части.</p>
+                <button id="go-to-practice-btn" class="button">Перейти к практике</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Практическая часть -->
+    <div id="practice-screen" class="hidden">
+        <div class="question">
+            <h3>Практическое задание</h3>
+            <div id="practice-task"></div>
+            
+            <div class="explanation">
+                <h4>Как проверяется ваш код:</h4>
+                <p>Система проверяет соответствие вывода вашей программы ожидаемому результату. 
+                   Убедитесь, что ваша программа выводит именно то, что указано в задании.</p>
+            </div>
+            
+            <h4>Напишите решение:</h4>
+            <textarea class="code-editor" id="code-input" placeholder="Введите ваш код на C/C++ здесь..."></textarea>
+            
+            <h4>Введите вывод вашей программы:</h4>
+            <textarea id="user-output" class="code-editor" placeholder="Введите вывод вашей программы..."></textarea>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button id="check-practice-btn" class="button">Проверить решение</button>
+            </div>
+            
+            <div id="practice-result" class="result"></div>
+        </div>
+    </div>
+    
+    <!-- Результаты экзамена -->
+    <div id="result-screen" class="hidden">
+        <div class="question">
+            <h3>Результаты экзамена</h3>
+            <div id="final-score" class="score"></div>
+            <div id="exam-result" class="result"></div>
+            <p id="result-message"></p>
+            <button id="restart-btn" class="button">Пройти экзамен снова</button>
+        </div>
+    </div>
+
+    <script>
+        // База теоретических вопросов
+        const theoryQuestions = [
+            {
+                question: "Что такое информация в контексте программирования?",
+                options: [
+                    "Сведения об окружающем мире, которые уменьшают неопределенность",
+                    "Данные, хранящиеся в памяти компьютера",
+                    "Любые символы, введенные с клавиатуры",
+                    "Результат выполнения программы"
+                ],
+                correct: 0
+            },
+            {
+                question: "Что такое алгоритм?",
+                options: [
+                    "Точная, конечная последовательность действий, приводящая к решению задачи",
+                    "Любая программа на языке C++",
+                    "Способ хранения данных в памяти",
+                    "Метод отладки программ"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какие формы представления алгоритмов существуют?",
+                options: [
+                    "Словесная, блок-схема, псевдокод, программа на языке программирования",
+                    "Только блок-схемы и программы",
+                    "Только словесная форма и псевдокод",
+                    "Графическая, табличная, текстовая"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какой тип данных в C++ используется для хранения символов?",
+                options: [
+                    "char",
+                    "string",
+                    "int",
+                    "float"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какой тип данных в C++ используется для хранения целых чисел?",
+                options: [
+                    "int",
+                    "char",
+                    "float",
+                    "double"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какой оператор используется для базового присваивания в C++?",
+                options: [
+                    "=",
+                    "==",
+                    ":=",
+                    "<-"
+                ],
+                correct: 0
+            },
+            {
+                question: "Что означает оператор += в C++?",
+                options: [
+                    "Составное присваивание (a += 5 эквивалентно a = a + 5)",
+                    "Присваивание с проверкой",
+                    "Присваивание с инкрементом",
+                    "Присваивание с конкатенацией"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какая функция является главной в программе на C++?",
+                options: [
+                    "main()",
+                    "start()",
+                    "init()",
+                    "run()"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какая библиотека используется для потокового ввода-вывода в C++?",
+                options: [
+                    "&lt;iostream&gt;",
+                    "&lt;stdio.h&gt;",
+                    "&lt;stream&gt;",
+                    "&lt;io&gt;"
+                ],
+                correct: 0
+            },
+            {
+                question: "Какой оператор используется для ввода данных в C++?",
+                options: [
+                    "cin >>",
+                    "cout <<",
+                    "scanf",
+                    "input"
+                ],
+                correct: 0
+            }
+        ];
+
+        // База практических заданий по уровням сложности
+        const practiceTasks = {
+            1: {
+                title: "Простая программа",
+                description: "Напишите программу на C++, которая выводит 'Hello, World!' на экран.",
+                testData: "Входные данные: отсутствуют",
+                expectedOutput: "Hello, World!"
+            },
+            2: {
+                title: "Сумма двух чисел",
+                description: "Напишите программу, которая запрашивает у пользователя два целых числа и выводит их сумму.",
+                testData: "Входные данные: 7 и 8",
+                expectedOutput: "15"
+            },
+            3: {
+                title: "Проверка четности",
+                description: "Напишите программу, которая запрашивает у пользователя целое число и выводит 'Четное', если число четное, и 'Нечетное' в противном случае.",
+                testData: "Входные данные: 10",
+                expectedOutput: "Четное"
+            },
+            4: {
+                title: "Факториал числа",
+                description: "Напишите программу, которая вычисляет факториал введенного пользователем числа.",
+                testData: "Входные данные: 5",
+                expectedOutput: "120"
+            },
+            5: {
+                title: "Поиск максимального элемента в массиве",
+                description: "Напишите программу, которая находит максимальный элемент в массиве из 10 целых чисел.",
+                testData: "Входные данные: [3, 7, 2, 9, 1, 8, 5, 4, 6, 0]",
+                expectedOutput: "9"
+            },
+            6: {
+                title: "Сортировка массива",
+                description: "Напишите программу, которая сортирует массив из 10 целых чисел по возрастанию.",
+                testData: "Входные данные: [5, 2, 8, 1, 9, 3, 7, 4, 6, 0]",
+                expectedOutput: "0 1 2 3 4 5 6 7 8 9"
+            },
+            7: {
+                title: "Работа со строками",
+                description: "Напишите программу, которая переворачивает введенную пользователем строку.",
+                testData: "Входные данные: 'Hello World'",
+                expectedOutput: "dlroW olleH"
+            },
+            8: {
+                title: "Рекурсивная функция",
+                description: "Напишите рекурсивную функцию для вычисления чисел Фибоначчи и программу, которая ее использует.",
+                testData: "Входные данные: 10",
+                expectedOutput: "55"
+            },
+            9: {
+                title: "Работа с файлами",
+                description: "Напишите программу, которая читает числа из файла, вычисляет их среднее значение и записывает результат в другой файл.",
+                testData: "Входные данные: файл с числами [10, 20, 30, 40]",
+                expectedOutput: "Среднее значение: 25"
+            },
+            10: {
+                title: "Сложная алгоритмическая задача",
+                description: "Реализуйте алгоритм быстрой сортировки (quicksort) для массива целых чисел.",
+                testData: "Входные данные: [9, 7, 5, 11, 12, 2, 14, 3, 10, 6]",
+                expectedOutput: "2 3 5 6 7 9 10 11 12 14"
+            }
+        };
+
+        // Переменные состояния экзамена
+        let selectedDifficulty = 0;
+        let currentTheoryIndex = 0;
+        let theoryAnswers = [];
+        let theoryScore = 0;
+        let selectedTheoryQuestions = [];
+        let practiceCompleted = false;
+        let practiceCorrect = false;
+
+        // Элементы DOM
+        const startScreen = document.getElementById('start-screen');
+        const theoryScreen = document.getElementById('theory-screen');
+        const practiceScreen = document.getElementById('practice-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const theoryContainer = document.getElementById('theory-container');
+        const prevTheoryBtn = document.getElementById('prev-theory-btn');
+        const nextTheoryBtn = document.getElementById('next-theory-btn');
+        const currentTheorySpan = document.getElementById('current-theory');
+        const totalTheorySpan = document.getElementById('total-theory');
+        const startBtn = document.getElementById('start-btn');
+        const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+        const practiceTask = document.getElementById('practice-task');
+        const codeInput = document.getElementById('code-input');
+        const userOutput = document.getElementById('user-output');
+        const checkPracticeBtn = document.getElementById('check-practice-btn');
+        const practiceResult = document.getElementById('practice-result');
+        const finalScore = document.getElementById('final-score');
+        const examResult = document.getElementById('exam-result');
+        const resultMessage = document.getElementById('result-message');
+        const restartBtn = document.getElementById('restart-btn');
+        const theoryProgress = document.getElementById('theory-progress');
+        const theoryCompleteSection = document.getElementById('theory-complete-section');
+        const goToPracticeBtn = document.getElementById('go-to-practice-btn');
+
+        // Функция для перемешивания массива (алгоритм Фишера-Йейтса)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Функция для перемешивания вариантов ответов в вопросах
+        function shuffleQuestions(questions) {
+            return questions.map(question => {
+                // Создаем копию вопроса
+                const shuffledQuestion = {...question};
+                
+                // Сохраняем правильный ответ
+                const correctAnswer = shuffledQuestion.options[shuffledQuestion.correct];
+                
+                // Перемешиваем варианты ответов
+                shuffledQuestion.options = shuffleArray([...shuffledQuestion.options]);
+                
+                // Обновляем индекс правильного ответа
+                shuffledQuestion.correct = shuffledQuestion.options.indexOf(correctAnswer);
+                
+                return shuffledQuestion;
+            });
+        }
+
+        // Инициализация
+        difficultyBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Снимаем выделение со всех кнопок
+                difficultyBtns.forEach(b => b.classList.remove('selected'));
+                // Выделяем выбранную кнопку
+                btn.classList.add('selected');
+                selectedDifficulty = parseInt(btn.getAttribute('data-level'));
+                startBtn.disabled = false;
+            });
+        });
+
+        // Функция для выбора случайных теоретических вопросов
+        function selectRandomTheoryQuestions() {
+            const shuffled = [...theoryQuestions].sort(() => 0.5 - Math.random());
+            selectedTheoryQuestions = shuffled.slice(0, 2);
+            
+            // Перемешиваем варианты ответов
+            selectedTheoryQuestions = shuffleQuestions(selectedTheoryQuestions);
+        }
+
+        // Функция для обновления прогресс-бара
+        function updateProgressBar() {
+            const progress = ((currentTheoryIndex + 1) / selectedTheoryQuestions.length) * 100;
+            theoryProgress.style.width = `${progress}%`;
+        }
+
+        // Функция для отображения теоретического вопроса
+        function displayTheoryQuestion() {
+            const question = selectedTheoryQuestions[currentTheoryIndex];
+            currentTheorySpan.textContent = currentTheoryIndex + 1;
+            totalTheorySpan.textContent = selectedTheoryQuestions.length;
+            
+            let optionsHTML = '';
+            question.options.forEach((option, index) => {
+                const isSelected = theoryAnswers[currentTheoryIndex] === index;
+                optionsHTML += `
+                    <div class="option ${isSelected ? 'selected' : ''}" data-index="${index}">
+                        ${option}
+                    </div>
+                `;
+            });
+            
+            theoryContainer.innerHTML = `
+                <div class="question">
+                    <h3>Теоретический вопрос ${currentTheoryIndex + 1}</h3>
+                    <p>${question.question}</p>
+                    <div class="options">
+                        ${optionsHTML}
+                    </div>
+                    <div id="theory-feedback-${currentTheoryIndex}" class="feedback"></div>
+                </div>
+            `;
+            
+            // Добавляем обработчики событий для вариантов ответов
+            document.querySelectorAll('.option').forEach(option => {
+                option.addEventListener('click', handleTheoryOptionClick);
+            });
+            
+            // Обновляем состояние кнопок
+            prevTheoryBtn.disabled = currentTheoryIndex === 0;
+            
+            // Проверяем, все ли вопросы отвечены
+            const allQuestionsAnswered = theoryAnswers.length === selectedTheoryQuestions.length && 
+                                         theoryAnswers.every(answer => answer !== undefined);
+            
+            // Если это последний вопрос и все вопросы отвечены, показываем кнопку перехода к практике
+            if (currentTheoryIndex === selectedTheoryQuestions.length - 1 && allQuestionsAnswered) {
+                theoryCompleteSection.classList.remove('hidden');
+                nextTheoryBtn.disabled = true;
+            } else {
+                theoryCompleteSection.classList.add('hidden');
+                nextTheoryBtn.disabled = currentTheoryIndex === selectedTheoryQuestions.length - 1 || 
+                                        theoryAnswers[currentTheoryIndex] === undefined;
+            }
+            
+            // Обновляем прогресс-бар
+            updateProgressBar();
+            
+            // Показываем feedback, если ответ уже выбран
+            if (theoryAnswers[currentTheoryIndex] !== undefined) {
+                showTheoryFeedback(currentTheoryIndex);
+            }
+        }
+
+        // Обработчик выбора варианта ответа в теоретической части
+        function handleTheoryOptionClick(e) {
+            const optionIndex = parseInt(e.currentTarget.getAttribute('data-index'));
+            theoryAnswers[currentTheoryIndex] = optionIndex;
+            
+            // Обновляем отображение выбранного варианта
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            e.currentTarget.classList.add('selected');
+            
+            // Показываем feedback
+            showTheoryFeedback(currentTheoryIndex);
+            
+            // Обновляем состояние кнопок
+            const allQuestionsAnswered = theoryAnswers.length === selectedTheoryQuestions.length && 
+                                         theoryAnswers.every(answer => answer !== undefined);
+            
+            if (currentTheoryIndex === selectedTheoryQuestions.length - 1 && allQuestionsAnswered) {
+                theoryCompleteSection.classList.remove('hidden');
+                nextTheoryBtn.disabled = true;
+            } else {
+                nextTheoryBtn.disabled = theoryAnswers[currentTheoryIndex] === undefined;
+            }
+        }
+
+        // Функция для показа обратной связи в теоретической части
+        function showTheoryFeedback(questionIndex) {
+            const question = selectedTheoryQuestions[questionIndex];
+            const userAnswer = theoryAnswers[questionIndex];
+            const feedbackElement = document.getElementById(`theory-feedback-${questionIndex}`);
+            
+            if (userAnswer === question.correct) {
+                feedbackElement.textContent = "Правильно!";
+                feedbackElement.className = "feedback correct";
+            } else {
+                feedbackElement.textContent = `Неправильно! Правильный ответ: ${question.options[question.correct]}`;
+                feedbackElement.className = "feedback incorrect";
+            }
+            
+            feedbackElement.style.display = "block";
+        }
+
+        // Функция для отображения практического задания
+        function displayPracticeTask() {
+            const task = practiceTasks[selectedDifficulty];
+            practiceTask.innerHTML = `
+                <h4>${task.title} (Сложность: ${selectedDifficulty}/10)</h4>
+                <p>${task.description}</p>
+                <div class="test-data">
+                    <strong>Тестовые данные:</strong> ${task.testData}<br>
+                    <strong>Ожидаемый вывод:</strong> ${task.expectedOutput}
+                </div>
+            `;
+            
+            // Очищаем поля ввода
+            codeInput.value = "";
+            userOutput.value = "";
+            practiceResult.style.display = "none";
+        }
+
+        // Функция для проверки практического задания
+        function checkPracticeSolution() {
+            const task = practiceTasks[selectedDifficulty];
+            const userOutputValue = userOutput.value.trim();
+            
+            // Простая проверка соответствия вывода
+            if (userOutputValue === task.expectedOutput) {
+                practiceResult.textContent = "Правильный вывод! Задание выполнено успешно.";
+                practiceResult.className = "result success";
+                practiceCorrect = true;
+            } else {
+                practiceResult.textContent = `Неправильный вывод. Ожидалось: "${task.expectedOutput}", получено: "${userOutputValue}"`;
+                practiceResult.className = "result failure";
+                practiceCorrect = false;
+            }
+            
+            practiceResult.style.display = "block";
+            practiceCompleted = true;
+            
+            // Автоматически переходим к результатам через 2 секунды
+            setTimeout(showExamResults, 2000);
+        }
+
+        // Функция для расчета результатов экзамена
+        function calculateExamResults() {
+            theoryScore = 0;
+            selectedTheoryQuestions.forEach((question, index) => {
+                if (theoryAnswers[index] === question.correct) {
+                    theoryScore++;
+                }
+            });
+            
+            const theoryText = `Теоретическая часть: ${theoryScore} из ${selectedTheoryQuestions.length}`;
+            const practiceText = practiceCorrect ? "Практическая часть: выполнена успешно" : "Практическая часть: не выполнена";
+            
+            finalScore.innerHTML = `${theoryText}<br>${practiceText}`;
+            
+            // Определяем общий результат
+            if (theoryScore === selectedTheoryQuestions.length && practiceCorrect) {
+                examResult.textContent = "ЭКЗАМЕН СДАН УСПЕШНО";
+                examResult.className = "result success";
+                resultMessage.textContent = "Поздравляем! Вы успешно сдали экзамен по программированию на C/C++.";
+            } else {
+                examResult.textContent = "ЭКЗАМЕН НЕ СДАН";
+                examResult.className = "result failure";
+                resultMessage.textContent = "К сожалению, вы не сдали экзамен. Попробуйте еще раз.";
+            }
+            
+            examResult.style.display = "block";
+        }
+
+        // Функция для показа результатов экзамена
+        function showExamResults() {
+            practiceScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            calculateExamResults();
+        }
+
+        // Обработчики событий
+        startBtn.addEventListener('click', () => {
+            selectRandomTheoryQuestions();
+            theoryAnswers = new Array(selectedTheoryQuestions.length);
+            startScreen.classList.add('hidden');
+            theoryScreen.classList.remove('hidden');
+            displayTheoryQuestion();
+        });
+
+        prevTheoryBtn.addEventListener('click', () => {
+            if (currentTheoryIndex > 0) {
+                currentTheoryIndex--;
+                displayTheoryQuestion();
+            }
+        });
+
+        nextTheoryBtn.addEventListener('click', () => {
+            if (currentTheoryIndex < selectedTheoryQuestions.length - 1) {
+                currentTheoryIndex++;
+                displayTheoryQuestion();
+            }
+        });
+
+        // Обработчик для кнопки перехода к практике
+        goToPracticeBtn.addEventListener('click', () => {
+            // Проверяем, что все теоретические вопросы отвечены
+            const allQuestionsAnswered = theoryAnswers.length === selectedTheoryQuestions.length && 
+                                         theoryAnswers.every(answer => answer !== undefined);
+            
+            if (allQuestionsAnswered) {
+                theoryScreen.classList.add('hidden');
+                practiceScreen.classList.remove('hidden');
+                displayPracticeTask();
+            } else {
+                alert("Пожалуйста, ответьте на все теоретические вопросы перед переходом к практике.");
+            }
+        });
+
+        checkPracticeBtn.addEventListener('click', checkPracticeSolution);
+
+        restartBtn.addEventListener('click', () => {
+            resultScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            currentTheoryIndex = 0;
+            theoryAnswers = [];
+            practiceCompleted = false;
+            practiceCorrect = false;
+            selectedDifficulty = 0;
+            difficultyBtns.forEach(b => b.classList.remove('selected'));
+            startBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>
